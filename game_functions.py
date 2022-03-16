@@ -112,16 +112,23 @@ def get_coords(number, random_square, random):
         random_square.display_number = True
         random.wait_for_random_numb = True
 
-def show_little_numbers(squares, screen, g_settings):
+def show_little_numbers(squares, screen, g_settings, random_square):
     a = 1
     i = 2
     for square in squares:
-        square.blitme()
         if a <= 5:
-            number = Number(screen, square.rect, square, str(a), g_settings)
+            if random_square.coord2 == a:
+                color = True
+            else:
+                color = False
+            number = Number(screen, square.rect, square, str(a), g_settings, color)
             number.blit()
         elif a % 5 == 1:
-            number = Number(screen, square.rect, square, str(i), g_settings)
+            if random_square.coord1 == i:
+                color = True
+            else:
+                color = False
+            number = Number(screen, square.rect, square, str(i), g_settings, color)
             number.blit()
             i += 1
         a += 1
@@ -131,6 +138,9 @@ def update_matrix(coord1, coord2, matrix, number):
     matrix.matrix[coord1 -1][coord2 -1] = number
     matrix.counter += 1
 
+def show_squares(squares):
+    for square in squares:
+        square.blitme()
 
 def add_new_number(random_square, dict_squares, screen, number,g_settings,
                    arr_numbers, free_squares, matrix):
@@ -146,7 +156,7 @@ def add_new_number(random_square, dict_squares, screen, number,g_settings,
                 if elem == str(a) + str(b):
                     square = dict_squares[elem]
                     square.width = 500
-                    display_number = Number(screen, square.rect, square, str(number), g_settings, True)
+                    display_number = Number(screen, square.rect, square, str(number), g_settings,False, True)
                     arr_numbers.append(display_number)
                     free_squares.remove(elem)
                     coord_found = 1
@@ -193,7 +203,9 @@ def update_screen(screen, g_settings, squares, random, random_square, dict_squar
 
     else:
         screen.fill(g_settings.bg_color)
-        show_little_numbers(squares, screen, g_settings)
+        show_squares(squares)
+
+
         number = random.number
 
         try:
@@ -205,6 +217,7 @@ def update_screen(screen, g_settings, squares, random, random_square, dict_squar
             m = np.array(matrix.matrix)
             text.result(count_points(m))
             print(matrix.matrix)
+        show_little_numbers(squares, screen, g_settings, random_square)
         show_random_rect(g_settings, number, screen)
         show_big_numbers(arr_numbers)
         if random.wait_for_random_numb:

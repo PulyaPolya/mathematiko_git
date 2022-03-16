@@ -25,6 +25,8 @@ class Settings():
         self.button2_position = (500, 500)
         self.button_font_size = 40
         self.button_font_color = (0, 0, 0)
+        self.font_color = (0, 0, 0)
+        self.font_special_color = (255, 0, 0)
 
 
 
