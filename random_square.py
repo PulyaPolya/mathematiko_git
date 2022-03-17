@@ -2,7 +2,7 @@ import pygame
 
 
 class RandomSquare():
-    def __init__(self, screen):
+    def __init__(self, screen, keys):
         self.screen = screen
         self.image = pygame.image.load('images/squaree.png')
         self.height = 200
@@ -17,7 +17,13 @@ class RandomSquare():
         self.coord1 = 0
         self.coord2 = 0
         self.display_number = False
+        self.show_number = True
 
+        self.free_squares = []
+        self.last_deleted_pos = -1
+        self.last_deleted_elem = -1
+        for key in keys:
+            self.free_squares.append(key)
 
     def blitme(self):
         self.screen.blit(self.image, self.rect)

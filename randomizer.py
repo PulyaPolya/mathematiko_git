@@ -8,11 +8,14 @@ class Random():
             self.dict[i] = 0
         self.number = self.get_random_numbet()
         self.wait_for_random_numb = False
+        self.previous_number = -1
     def get_random_numbet(self):
+
         number = random.randint(1, 13)
         while self.dict[number] >= 4:
             number = random.randint(1, 13)
-        self.dict[number] += 3
+        self.dict[number] += 1
         self.number = number
         return number
+
 

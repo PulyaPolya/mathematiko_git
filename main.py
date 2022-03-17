@@ -19,19 +19,20 @@ def run_game():
     dict_squares = gf.get_squares(screen,  square_positions)[1]
     keys = dict_squares.keys()
     free_squares = []
+    free_squares_old = []
     for key in keys:
         free_squares.append(key)
 
     random = Random()
-    random_square = RandomSquare(screen)
+    random_square = RandomSquare(screen, keys)
     arr_numbers = []
     text = Text(screen,g_settings)
     matrix = Matrix(g_settings)
     while True:
 
-        gf.check_events(random, random_square, g_settings)
+        #gf.check_events(random, random_square, g_settings)
         gf.update_screen(screen, g_settings, squares, random, random_square, dict_squares,
-                         arr_numbers, free_squares, text, matrix)
+                         arr_numbers, random_square.free_squares, text, matrix)
 
 
 run_game()
