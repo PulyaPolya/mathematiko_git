@@ -76,15 +76,17 @@ def check_events(random, random_square, g_settings, arr_numbers, free_squares, m
             elif event.key == pygame.K_z:
                 mods = pygame.key.get_mods()
                 if mods & pygame.KMOD_CTRL:
-                    random_square.wait_for_first_coord = True
-                    random_square.wait_for_second_coord = False
-                    arr_numbers.pop(-1)
-                    random_square.free_squares.insert(random_square.last_deleted_pos, random_square.last_deleted_elem)
-                    random.wait_for_random_numb = False
-                    random.number = random.previous_number
-                    matrix.counter -= 1
-                    #free_squares.append(wrong_coord)
-                    print('ctrl Z')
+                    if not random_square.cancel:
+                        random_square.wait_for_first_coord = True
+                        random_square.wait_for_second_coord = False
+                        arr_numbers.pop(-1)
+                        random_square.free_squares.insert(random_square.last_deleted_pos, random_square.last_deleted_elem)
+                        random.wait_for_random_numb = False
+                        random.number = random.previous_number
+                        matrix.counter -= 1
+                        random_square.cancel = True
+                        #free_squares.append(wrong_coord)
+                        print('ctrl Z')
         elif event.type == pygame.QUIT:
                 sys.exit()
 
@@ -106,6 +108,7 @@ def randomize(random, random_square):
     random_square.display_number = False
 
 def get_coords(number, random_square, random):
+    random_square.cancel = False
     if random_square.wait_for_first_coord:
         random_square.coord2 = number
         random_square.wait_for_first_coord = False

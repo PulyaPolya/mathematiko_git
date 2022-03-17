@@ -18,7 +18,7 @@ class RandomSquare():
         self.coord2 = 0
         self.display_number = False
         self.show_number = True
-
+        self.cancel = False
         self.free_squares = []
         self.last_deleted_pos = -1
         self.last_deleted_elem = -1
