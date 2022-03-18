@@ -1,13 +1,29 @@
 import sys
-
 import numpy as np
-
 import win_combinations as w
 from square import Square
 import pygame
 from number_square import Number
 from custom_exception import FullTable, TakenSpot
-import  button as btt
+import button as btt
+
+
+def get_square_positions():
+    arr = []
+    x = 100
+    y = 100
+    for j in range(5):
+        for i in range(5):
+            position = []
+            position.append(y)
+            position.append(x)
+            arr.append(position)
+            x += 100
+        x = 100
+        y += 100
+    return arr
+
+
 def np_to_arr(col):
     array = []
     for elem in col:
@@ -23,11 +39,6 @@ def count_points(A):
         sum += d
     for j in range (len(A)):
         arr = np_to_arr(A[:,j])
-        d = w.count_row(arr)
-        if arr == [1, 10, 11, 12, 13]:
-            #print('d is ')
-            #print(d)
-            pass
         d = w.count_row(arr)
         sum += d
 
@@ -46,7 +57,6 @@ def get_squares(screen, squares_pos):
     squares = []
     dict_squares = {}
     for position in squares_pos:
-
         square = Square(screen, position[0], position[1])
         i = int(position[0] / 100)
         j = int(position[1] / 100)
@@ -56,39 +66,36 @@ def get_squares(screen, squares_pos):
     return (squares, dict_squares)
 
 
-def check_events(random, random_square, g_settings, arr_numbers, free_squares, matrix):
+def check_events(random, random_square, g_settings, arr_numbers, table):
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
             random_square.show_number = True
-            if event.key == pygame.K_RETURN:
-                randomize(random, random_square)
-                g_settings.start_game = 1
-            elif event.key == pygame.K_1:
-               get_coords(1, random_square, random)
+            if event.key == pygame.K_1:
+               get_coords(1, random_square, random, table)
             elif event.key == pygame.K_2:
-               get_coords(2, random_square, random)
+               get_coords(2, random_square, random, table)
             elif event.key == pygame.K_3:
-               get_coords(3, random_square, random)
+               get_coords(3, random_square, random, table)
             elif event.key == pygame.K_4:
-               get_coords(4, random_square, random)
+               get_coords(4, random_square, random, table)
             elif event.key == pygame.K_5:
-               get_coords(5, random_square, random)
+               get_coords(5, random_square, random, table)
             elif event.key == pygame.K_z:
                 mods = pygame.key.get_mods()
                 if mods & pygame.KMOD_CTRL:
-                    if not random_square.cancel:
-                        random_square.wait_for_first_coord = True
-                        random_square.wait_for_second_coord = False
+                    if not table.cancel:
+                        table.wait_for_first_coord = True
+                        table.wait_for_second_coord = False
                         arr_numbers.pop(-1)
-                        random_square.free_squares.insert(random_square.last_deleted_pos, random_square.last_deleted_elem)
+                        table.free_squares.insert(table.last_deleted_pos,
+                                                          table.last_deleted_elem)
                         random.wait_for_random_numb = False
                         random.number = random.previous_number
-                        matrix.counter -= 1
-                        random_square.cancel = True
-                        #free_squares.append(wrong_coord)
-                        print('ctrl Z')
+                        table.counter -= 1
+                        table.cancel = True
         elif event.type == pygame.QUIT:
                 sys.exit()
+
 
 def check_buttons(b1, b2, text, g_settings):
     for event in pygame.event.get():
@@ -101,88 +108,95 @@ def check_buttons(b1, b2, text, g_settings):
         elif event.type == pygame.QUIT:
                 sys.exit()
 
-def randomize(random, random_square):
+
+def randomize(random, random_square, table):
     random.wait_for_random_numb = True
-    random_square.wait_for_first_coord = True
-    random_square.wait_for_second_coord = False
+    table.wait_for_first_coord = True
+    table.wait_for_second_coord = False
     random_square.display_number = False
 
-def get_coords(number, random_square, random):
-    random_square.cancel = False
-    if random_square.wait_for_first_coord:
-        random_square.coord2 = number
-        random_square.wait_for_first_coord = False
-        random_square.wait_for_second_coord = True
+
+def get_coords(number, random_square, random, table):
+    table.cancel = False
+    if table.wait_for_first_coord:
+        table.coord2 = number
+        table.wait_for_first_coord = False
+        table.wait_for_second_coord = True
         random_square.display_number = False
         random.wait_for_random_numb = False
-    elif random_square.wait_for_second_coord:
-        random_square.coord1 = number
-        random_square.wait_for_first_coord = True
-        random_square.wait_for_second_coord = False
+    elif table.wait_for_second_coord:
+        table.coord1 = number
+        table.wait_for_first_coord = True
+        table.wait_for_second_coord = False
         random_square.display_number = True
         random.wait_for_random_numb = True
 
-def show_little_numbers(squares, screen, g_settings, random_square):
+
+def show_little_numbers(squares, screen, g_settings, table):
     a = 1
     i = 2
     for square in squares:
         if a <= 5:
-            if random_square.coord2 == a:
+            if table.coord2 == a:
                 color = True
             else:
                 color = False
-            number = Number(screen, square.rect, square, str(a), g_settings, color)
+            number = Number(screen, square.rect, str(a), g_settings, color)
             number.blit()
         elif a % 5 == 1:
-            if random_square.coord1 == i:
+            if table.coord1 == i:
                 color = True
             else:
                 color = False
-            number = Number(screen, square.rect, square, str(i), g_settings, color)
+            number = Number(screen, square.rect,str(i), g_settings, color)
             number.blit()
             i += 1
         a += 1
 
 
-def update_matrix(coord1, coord2, matrix, number):
-    matrix.matrix[coord1 -1][coord2 -1] = number
-    matrix.counter += 1
+def update_matrix(coord1, coord2, number, table):
+    table.matrix[coord1 -1][coord2 -1] = number
+    table.counter += 1
+
 
 def show_squares(squares):
     for square in squares:
         square.blitme()
 
+
 def add_new_number(random_square, dict_squares, screen, number,g_settings,
-                   arr_numbers, free_squares, matrix):
-    if matrix.counter == 25:
+                   arr_numbers, table):
+    if table.counter == 25:
         raise FullTable
     if random_square.display_number:
-        a = random_square.coord1
-        b = random_square.coord2
+        a = table.coord1
+        b = table.coord2
         coord_found = 0
-        if free_squares:
-            print(free_squares)
-            for elem in free_squares:
+        if table.free_squares:
+            print(table.free_squares)
+            for elem in table.free_squares:
                 if elem == str(a) + str(b):
                     square = dict_squares[elem]
                     square.width = 500
-                    display_number = Number(screen, square.rect, square, str(number), g_settings,False, True)
+                    display_number = Number(screen, square.rect,str(number), g_settings,False, True)
                     arr_numbers.append(display_number)
-                    random_square.last_deleted_pos = random_square.free_squares.index(elem)
-                    random_square.last_deleted_elem = elem
-                    random_square.free_squares.remove(elem)
+                    table.last_deleted_pos = table.free_squares.index(elem)
+                    table.last_deleted_elem = elem
+                    table.free_squares.remove(elem)
                     coord_found = 1
                     random_square.display_number = False
-                    update_matrix(a, b, matrix, number)
+                    update_matrix(a, b,  number, table)
                     break
             if coord_found == 0:
                 raise TakenSpot
         else:
             raise FullTable
 
+
 def show_big_numbers(arr_numbers):
     for number in arr_numbers:
         number.blit()
+
 
 def show_random_rect(g_settings, number, screen):
     font = pygame.font.SysFont(None, g_settings.random_font_size)
@@ -193,11 +207,11 @@ def show_random_rect(g_settings, number, screen):
     screen.blit(img, (g_settings.random_window_x + rect.width / 2 - img.get_width() / 2,
                       g_settings.random_window_y + rect.height / 2 - img.get_height() / 2))
 
+
 def start(g_settings, screen, text):
     screen.fill(g_settings.bg_color)
     if text.show_greetings:
         text.start_game()
-
 
 
 def menu(g_settings, screen, text):
@@ -205,39 +219,35 @@ def menu(g_settings, screen, text):
     b1 = btt.Button(screen, g_settings.button1_position, "Show rules", g_settings)
     b2 = btt.Button(screen, g_settings.button2_position, "Start a new game", g_settings)
     check_buttons(b1, b2, text, g_settings)
-
-    if g_settings.show_rules == True:
+    if g_settings.show_rules:
         text.show_rules()
+
+
 def update_screen(screen, g_settings, squares, random, random_square, dict_squares,
-                  arr_numbers, free_squares, text, matrix):
+                  arr_numbers, text, table):
 
-    check_events(random, random_square, g_settings, arr_numbers, free_squares, matrix)
+    check_events(random, random_square, g_settings, arr_numbers,  table)
     if g_settings.start_game == 0:
-
         menu(g_settings, screen, text)
-        #g_settings.start_game = 1
-
     else:
         screen.fill(g_settings.bg_color)
         show_squares(squares)
-        #random.wait_for_random_numb = True
-
         number = random.number
         try:
             if random_square.show_number:
-                add_new_number(random_square, dict_squares, screen, number, g_settings, arr_numbers, free_squares, matrix)
+                add_new_number(random_square, dict_squares, screen, number, g_settings, arr_numbers, table)
         except TakenSpot:
             text.error_message('taken')
         except FullTable:
             text.error_message('full')
-            m = np.array(matrix.matrix)
+            m = np.array(table.matrix)
             text.result(count_points(m))
-            print(matrix.matrix)
-        show_little_numbers(squares, screen, g_settings, random_square)
+            print(table.matrix)
+        show_little_numbers(squares, screen, g_settings, table)
         show_random_rect(g_settings, number, screen)
         show_big_numbers(arr_numbers)
         if random.wait_for_random_numb:
             random.previous_number = random.number
-            number = random.get_random_numbet()
+            random.get_random_number()
             random.wait_for_random_numb = False
     pygame.display.flip()

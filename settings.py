@@ -32,18 +32,4 @@ class Settings():
 
 
 
-    def get_square_positions(self):
-        arr = []
-        x = 100
-        y = 100
-        for j in range (5):
 
-            for i in range (5):
-                position = []
-                position.append(y)
-                position.append(x)
-                arr.append(position)
-                x += 100
-            x = 100
-            y += 100
-        return arr
